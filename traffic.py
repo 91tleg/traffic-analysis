@@ -6,7 +6,6 @@ from io import BytesIO
 
 image_url = "https://products.issaquahwa.gov/cams/Gilman12th_NW.jpg"
 
-
 #https://products.issaquahwa.gov/cams/Gilman12th_NW.jpg
 #https://products.issaquahwa.gov/cams/FrontGilman_NW.jpg
 
@@ -17,17 +16,18 @@ image = image.convert("RGB")
 image_np = np.array(image)
 image_hsv = cv2.cvtColor(image_np, cv2.COLOR_RGB2HSV)
 
-x1, y1, x2, y2 = 748, 420, 760, 440
+x1, y1, x2, y2 = 887, 433, 891, 441
 roi = image_np[y1:y2, x1:x2]
 
 # Convert ROI to HSV for color detection
 roi_hsv = cv2.cvtColor(roi, cv2.COLOR_RGB2HSV)
 
 color_ranges = {
-    "Red": [(0, 100, 100), (10, 255, 255)], 
+    "Red": [(0, 120, 70), (10, 255, 255)], 
     "Yellow": [(20, 100, 100), (40, 255, 255)], 
-    "Green": [(40, 50, 50), (80, 255, 255)]
+    "Green": [(35, 50, 50), (85, 255, 255)]
 }
+
 
 red_pixel_count = 0
 green_pixel_count = 0
