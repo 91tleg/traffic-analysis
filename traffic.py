@@ -1,71 +1,55 @@
 import cv2
 import numpy as np
-import requests
-from PIL import Image
-from io import BytesIO
 
-image_url = "https://products.issaquahwa.gov/cams/Gilman12th_NW.jpg"
+def process_video(url):
+    video = cv2.VideoCapture(url)
 
-#https://products.issaquahwa.gov/cams/Gilman12th_NW.jpg
-#https://products.issaquahwa.gov/cams/FrontGilman_NW.jpg
+    if not video.isOpened():
+        print("Error: Cannot open video stream")
+        return
 
-response = requests.get(image_url)
-image = Image.open(BytesIO(response.content))
-image = image.convert("RGB")
+    while True:
+        ret, frame = video.read()
+        if not ret:
+            print("Error: Could not read frame")
+            break
 
-image_np = np.array(image)
-image_hsv = cv2.cvtColor(image_np, cv2.COLOR_RGB2HSV)
+        # Resize
+        frame = cv2.resize(frame, (640, 480))
 
-x1, y1, x2, y2 = 887, 433, 891, 441
-roi = image_np[y1:y2, x1:x2]
+        x, y, w, h = 375, 109, 4, 15
+        roi = frame[y:y+h, x:x+w]
 
-# Convert ROI to HSV for color detection
-roi_hsv = cv2.cvtColor(roi, cv2.COLOR_RGB2HSV)
+        # Convert to HSV for better detection
+        hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
 
-color_ranges = {
-    "Red": [(0, 120, 70), (10, 255, 255)], 
-    "Yellow": [(20, 100, 100), (40, 255, 255)], 
-    "Green": [(35, 50, 50), (85, 255, 255)]
-}
+        red_lower = np.array([0, 100, 100])
+        red_upper = np.array([10, 255, 255])
+        green_lower = np.array([40, 40, 40])
+        green_upper = np.array([90, 255, 255])
 
+        red_mask = cv2.inRange(hsv, red_lower, red_upper)
+        green_mask = cv2.inRange(hsv, green_lower, green_upper)
 
-red_pixel_count = 0
-green_pixel_count = 0
-yellow_pixel_count = 0
+        red_pixels = cv2.countNonZero(red_mask)
+        green_pixels = cv2.countNonZero(green_mask)
 
-for color, (lower, upper) in color_ranges.items():
-    lower = np.array(lower)
-    upper = np.array(upper)
+        status = "No light detected"
+        if red_pixels > green_pixels:
+            status = "Red light detected"
+        elif green_pixels > red_pixels:
+            status = "Green light detected"
 
-    # Mask to detect the color in the ROI
-    mask = cv2.inRange(roi_hsv, lower, upper)
-    
-    pixel_count = np.sum(mask > 0)
+        cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 255, 255), 2)
+        cv2.putText(frame, status, (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
 
-    if color == "Red":
-        red_pixel_count = pixel_count
-    elif color == "Green":
-        green_pixel_count = pixel_count
-    elif color == "Yellow":
-        yellow_pixel_count = pixel_count
+        cv2.imshow("Traffic Light Detection", frame)
+        cv2.imshow("ROI", roi)
 
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if cv2.waitKey(1) & 0xFF == 27:  # esc
+            break
+    video.release()
+    cv2.destroyAllWindows()
 
-    for contour in contours:
-        area = cv2.contourArea(contour)
-        if area > 100:
-            x, y, w, h = cv2.boundingRect(contour)
-            cv2.rectangle(image_np, (x + x1, y + y1), (x + x1 + w, y + y1 + h), (255, 255, 255), 2)
-            cv2.putText(image_np, color, (x + x1, y + y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-            print(f"Detected {color} light at [{x + x1}, {y + y1}, {w}, {h}]")
-
-if red_pixel_count > green_pixel_count and red_pixel_count > yellow_pixel_count:
-    result = "Red"
-elif green_pixel_count > red_pixel_count and green_pixel_count > yellow_pixel_count:
-    result = "Green"
-elif yellow_pixel_count > red_pixel_count and yellow_pixel_count > green_pixel_count:
-    result = "Yellow"
-else:
-    result = "No light detected"
-
-print(f"Traffic light color: {result}")
+video_url = "https://trafficcams.bellevuewa.gov/traffic-edge/CCTV075L.stream/playlist.m3u8"
+process_video(video_url)
