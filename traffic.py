@@ -4,15 +4,55 @@ import time
 import threading
 
 camera_configs = {
-    "164th_24th": {
+    "164ave_24st": {
         "url":  "https://trafficcams.bellevuewa.gov/traffic-edge/CCTV075L.stream/playlist.m3u8",
         "roi": (375, 111, 6, 15),
-        "map_pos": (100, 100)
+        "map_pos": (1375, 640)
     },
-    "164th_northup": {
+    "164ave_northup": {
         "url": "https://trafficcams.bellevuewa.gov/traffic-edge/CCTV076L.stream/playlist.m3u8",
         "roi": (330, 45, 6, 18),
-        "map_pos": (100, 100)
+        "map_pos": (1375, 770)
+    },
+    "158ave_8st": {
+        "url": "https://trafficcams.bellevuewa.gov:443/traffic-edge/CCTV299L.stream/playlist.m3u8",
+        "roi": (100, 100, 100, 0),
+        "map_pos": (1292, 918)
+    },
+    "156ave_8st": {
+        "url": "https://trafficcams.bellevuewa.gov:443/traffic-edge/CCTV063L.stream/playlist.m3u8",
+        "roi": (0, 0, 0, 0),
+        "map_pos": (1229, 911)
+    },
+    "156ave_10st": {
+        "url": "https://trafficcams.bellevuewa.gov:443/traffic-edge/CCTV067L.stream/playlist.m3u8",
+        "roi": (0, 0, 0, 0),
+        "map_pos": (1234, 859)
+    },
+    "156ave_15st": {
+        "url": "https://trafficcams.bellevuewa.gov:443/traffic-edge/CCTV066L.stream/playlist.m3u8",
+        "roi": (0, 0, 0, 0),
+        "map_pos": (1234, 710)
+    },
+    "156ave_northup": {
+        "url": "https://trafficcams.bellevuewa.gov:443/traffic-edge/CCTV062L.stream/playlist.m3u8",
+        "roi": (0, 0, 0, 0),
+        "map_pos": (1236, 640)
+    },
+    "belred_24st": {
+        "url": "https://trafficcams.bellevuewa.gov:443/traffic-edge/CCTV059L.stream/playlist.m3u8",
+        "roi": (0, 0, 0, 0),
+        "map_pos": (1210, 635)
+    },
+    "148ave_24st": {
+        "url": "https://trafficcams.bellevuewa.gov:443/traffic-edge/CCTV081L.stream/playlist.m3u8",
+        "roi": (0, 0, 0, 0),
+        "map_pos": (956, 635)
+    },
+    "140ave_24st": {
+        "url": "https://trafficcams.bellevuewa.gov:443/traffic-edge/CCTV064L.stream/playlist.m3u8",
+        "roi": (0, 0, 0, 0),
+        "map_pos": (1104, 640)
     }
 }
 
@@ -77,9 +117,9 @@ while True:
         else: 
             color = (200, 200, 200) # Gray
 
-        cv2.circle(display_map, pos, 15, color, -1)
+        cv2.circle(display_map, pos, 5, color, -1)
         cv2.putText(display_map, name, (pos[0] - 30, pos[1] - 20),
-                    cv2.FONT_HERSHEY_TRIPLEX, 0.5, (255, 255, 255), 1)
+                    cv2.FONT_HERSHEY_PLAIN, 1.0, (200, 100, 255), 1)
 
     cv2.imshow("Traffic Light Map", display_map)
     if cv2.waitKey(100) & 0xFF == 27:
